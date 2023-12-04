@@ -1,0 +1,7 @@
+node_modules
+.next
+/src/services/*-services
+/src/services/*.js
+.eslintcache
+certificates
+tsconfig.tsbuildinfo

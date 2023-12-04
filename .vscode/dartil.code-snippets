@@ -1,0 +1,6 @@
+{
+  "create functional component": {
+    "prefix": "fc",
+    "body": ["'use client'", "", "export const $TM_FILENAME_BASE$1 = () => {", "\treturn ($2)", "}"]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "eslint.validate": ["json"],
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true
+  },
+  "cSpell.words": [
+    "Embla",
+    "glyphy",
+    "partialize",
+    "zustand"
+  ]
+}

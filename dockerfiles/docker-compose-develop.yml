@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  dev-qcommerce:
+    image: docker.hasti.co/frontend/dartilq:develop
+    restart: always
+    container_name: 'dev_qcommerce_front'
+    pull_policy: always
+    ports:
+      - 4003:4003
+
+networks:
+  default:
+    external: true
+    name: develop

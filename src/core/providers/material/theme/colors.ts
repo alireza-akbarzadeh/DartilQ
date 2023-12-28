@@ -80,4 +80,13 @@ const neutral: RequiredColor = {
   900: '#0E0F0F',
 }
 
-export { error, info, neutral, primary, secondary, tertiary }
+const grey: ColorPartial = {
+  100: '#F0F3F5',
+  200: '#E1E3E5',
+  300: '#ABAFB2',
+  500: '#8D9399',
+  700: '#676E73',
+  900: '#40464D',
+}
+
+export { error, grey, info, neutral, primary, secondary, tertiary }

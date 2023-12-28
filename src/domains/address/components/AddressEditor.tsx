@@ -1,4 +1,4 @@
-import { Box, Stack } from '@mui/material'
+import { Box, CircularProgress, Stack } from '@mui/material'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
@@ -8,18 +8,20 @@ import { useWindowHeight } from '@/core/hooks'
 import { AddressFormType, AddressStepsType } from '@/domains/address/address.types'
 import { FormEditor } from '@/domains/address/components/FormEditor'
 import { MapEditor } from '@/domains/address/components/MapEditor'
-import { AppBarHeight, AppBottomBar, AppTopBar } from '@/shared/layout'
+import { AppBarHeight, AppTopBar } from '@/shared/layout'
 
 type AddressEditorPageProps = {
   step: AddressStepsType
+  gettingLoading: boolean
 }
 
-const AddressEditor = ({ step }: AddressEditorPageProps) => {
+const AddressEditor = ({ step, gettingLoading }: AddressEditorPageProps) => {
   const { watch, formState } = useFormContext<AddressFormType>()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const source = searchParams.get('source')
+  const addressId = searchParams.get('id')
   const windowHeight = useWindowHeight()
   const [loading, setLoading] = useState(false)
 
@@ -41,34 +43,51 @@ const AddressEditor = ({ step }: AddressEditorPageProps) => {
     router.replace(`/${source ?? ''}`)
   }
 
+  const handleNavigationSearchParams = () => {
+    let returnedSearchParams = ''
+    if (source) returnedSearchParams += `&source=${source}`
+    if (addressId) returnedSearchParams += `&id=${addressId}`
+    return returnedSearchParams
+  }
+
   const nextStep = () => {
-    router.push(`${pathname}?step=form${source ? `&source=${source}` : ''}`)
+    router.push(`${pathname}?step=form${handleNavigationSearchParams()}`)
   }
 
   useEffect(() => {
     if (step === 'form' && nextStateDisabled) {
-      router.replace(`${pathname}?step=map${source ? `&source=${source}` : ''}`)
+      router.replace(`${pathname}?step=map${handleNavigationSearchParams()}`)
     }
   }, [step])
   if (!windowHeight) return null
 
+  const backButtonUrl = () => {
+    if (addressId && step === 'map') return source ?? '/'
+    return `/address?step=${step === 'map' ? 'navigation' : 'map'}${handleNavigationSearchParams()}`
+  }
   return (
     <>
       <AppTopBar
         hasBackButton
-        title={step === 'map' ? 'موقعیت مکانی آدرس جدید' : 'تکمیل آدرس'}
-        backUrl={`/address?step=${step === 'map' ? 'navigation' : 'map'}`}
+        title={step === 'map' ? 'موقعیت مکانی آدرس جدید' : 'افزودن آدرس جدید'}
+        backUrl={backButtonUrl()}
       />
-      <Box
-        sx={{
-          height: windowHeight - 80,
-          pt: `${AppBarHeight + 8}px`,
-        }}
-      >
-        <Stack sx={{ overflowY: 'auto', height: '100%', px: 4 }}>{rendered}</Stack>
-      </Box>
 
-      <AppBottomBar>
+      <Stack sx={{ height: '100dvh', pt: `${AppBarHeight + 8}px` }}>
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+          }}
+        >
+          {gettingLoading && (
+            <Stack alignItems="center" justifyContent="center" sx={{ height: '100%' }}>
+              <CircularProgress />
+            </Stack>
+          )}
+          {!gettingLoading && <Stack sx={{ overflowY: 'auto', height: '100%', px: 4 }}>{rendered}</Stack>}
+        </Box>
+
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -91,18 +110,12 @@ const AddressEditor = ({ step }: AddressEditorPageProps) => {
             </HBButton>
           )}
           {step === 'form' && (
-            <HBButton
-              loading={formState.isSubmitting}
-              disabled={!formState.isValid}
-              sx={{ flex: 1 }}
-              type="submit"
-              variant="primary"
-            >
-              ثبت
+            <HBButton loading={formState.isSubmitting} sx={{ flex: 1 }} type="submit" variant="primary">
+              {addressId ? 'ویرایش' : 'ثبت'}
             </HBButton>
           )}
         </Stack>
-      </AppBottomBar>
+      </Stack>
     </>
   )
 }

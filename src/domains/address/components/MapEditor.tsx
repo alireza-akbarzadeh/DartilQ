@@ -15,6 +15,8 @@ const MapEditor = (props: MapEditorProps) => {
     reset({ ...getValues(), latitude: position.lat, longitude: position.lng })
   }
 
+  if (!watch('latitude') && !watch('longitude')) return null
+
   return (
     <Stack height="100%" spacing={4} borderRadius={3} sx={{ borderRadius: 3, overflowX: 'hidden' }}>
       <Map
@@ -40,8 +42,8 @@ const MapEditor = (props: MapEditorProps) => {
         centerMode
         isLoading={props.loadingChanged}
         isShowSearch
-        latitude={watch('latitude') ?? 0}
-        longitude={watch('longitude') ?? 0}
+        latitude={watch('latitude')}
+        longitude={watch('longitude')}
         onNavigationChanged={handleNavigation}
       />
     </Stack>

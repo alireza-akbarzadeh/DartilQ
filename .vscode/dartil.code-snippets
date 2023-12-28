@@ -2,5 +2,21 @@
   "create functional component": {
     "prefix": "fc",
     "body": ["'use client'", "", "export const $TM_FILENAME_BASE$1 = () => {", "\treturn ($2)", "}"]
+  },
+  "create Box with flex and justify content and align items center": {
+    "prefix": "flexBox",
+    "body": ["<Box display='flex' alignItems='center$1' justifyContent='space-between$2'>$3</Box> "]
+  },
+  "console log": {
+    "prefix": "clg",
+    "body": ["console.log('$1',$1)"]
+  },
+  "session data": {
+    "prefix": "useSession",
+    "body": ["const { data: userSession } = useSession$1()"]
+  },
+  "destruct props": {
+    "prefix": "props",
+    "body": ["const { $1 } = props"]
   }
 }

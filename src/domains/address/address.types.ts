@@ -1,6 +1,6 @@
 import { AddAddress, Address } from '@/services/Qcommerce Bff-services/Qcommerce Bff.schemas'
 
-type SessionAddress = Pick<Address, 'cityId' | 'latitude' | 'longitude'>
+type SessionAddress = Pick<Address, 'id' | 'cityId' | 'latitude' | 'longitude'>
 
 type AddressStepsType = 'map' | 'form' | 'navigation'
 

@@ -141,9 +141,6 @@ const button: MuiButtonType = {
         '&:hover': {
           backgroundColor: info[50],
         },
-        '&:focus': {
-          outline: `2px solid ${info[100]}`,
-        },
         '&:active': {
           backgroundColor: info[100],
         },

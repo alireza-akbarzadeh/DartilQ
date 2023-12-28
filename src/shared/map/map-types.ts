@@ -28,7 +28,7 @@ type SearchBoxProps = {
 }
 
 type searchType = {
-  id: string
+  id?: string
   address?: string
   location?: Location
   name?: string

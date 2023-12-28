@@ -13,9 +13,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       justifyContent="space-between"
     >
       <Box
-        display={'flex'}
-        alignItems="center"
-        justifyContent="center"
         flexGrow={1}
         sx={{
           position: 'relative',
@@ -31,7 +28,19 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           },
         }}
       >
-        <HBNextImage isLocal src={'/assets/svg/logoWhite.svg'} alt="logo" width={80} height={80} />
+        <HBNextImage
+          isLocal
+          src={'/assets/svg/logoWhite.svg'}
+          alt="logo"
+          width={80}
+          height={80}
+          style={{
+            position: 'absolute',
+            top: '50%',
+            right: '50%',
+            transform: 'translate(50%, -50%)',
+          }}
+        />
       </Box>
 
       <Box bgcolor={'background.lightest'} bottom={0} px={4} pb={6} pt={3}>

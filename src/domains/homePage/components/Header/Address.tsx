@@ -1,32 +1,61 @@
 'use client'
 import { Box, RadioGroup, Stack, Typography } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { useId, useState } from 'react'
+import toast from 'react-hot-toast'
 
 import { HBBottomSheet, HBIcon } from '@/core/components'
-import { useGetUserAddresses, usePutUserAddressAddressIdDefault } from '@/services/Qcommerce Bff-services/Qcommerce Bff'
+import {
+  getGetUserAddressesQueryKey,
+  useGetUserAddresses,
+  usePutUserAddressAddressIdDefault,
+} from '@/services/Qcommerce Bff-services/Qcommerce Bff'
 import { useDefaultAddress } from '@/shared/hooks/useDefaultAddress'
 
 import { AddressItem } from './AddressItem'
 
 type AddressProps = {
   onChangeDefaultAddress: (refreshDefaultAddressKey: string) => void
+  isVisible: boolean
 }
 
-export const Address = ({ onChangeDefaultAddress }: AddressProps) => {
+export const Address = (props: AddressProps) => {
+  const { onChangeDefaultAddress, isVisible } = props
   const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false)
   const { defaultAddress } = useDefaultAddress()
   const { data: addressData } = useGetUserAddresses()
   const { push } = useRouter()
-  const { mutateAsync: updateDefaultAddress } = usePutUserAddressAddressIdDefault()
+  const { mutateAsync: updateDefaultAddress, isPending: changeDefaultPending } = usePutUserAddressAddressIdDefault()
   const refreshDefaultAddressKey = useId()
+  const queryClient = useQueryClient()
+  const { update } = useSession()
 
   const handleChangeAddress = (addressId: string) => {
-    updateDefaultAddress({ addressId }).then(res => {
+    if (changeDefaultPending || defaultAddress?.id === addressId) return
+    updateDefaultAddress({ addressId }).then(async res => {
+      const newDefaultAddress = addressData?.data?.find(address => address.id === addressId)
       if (res?.success) {
-        setOpenBottomSheet(false)
+        if (newDefaultAddress)
+          await update({
+            address: {
+              id: newDefaultAddress.id,
+              cityId: newDefaultAddress.cityId,
+              latitude: newDefaultAddress.latitude,
+              longitude: newDefaultAddress.longitude,
+            },
+          })
         onChangeDefaultAddress(refreshDefaultAddressKey)
+        toast.success('تغییر آدرس پیشفرض با موفقیت انجام شد')
       }
+    })
+  }
+
+  const removeCliently = (id: string) => {
+    queryClient.setQueryData(getGetUserAddressesQueryKey(), {
+      ...addressData,
+      data: addressData?.data?.filter(address => address.id !== id),
     })
   }
 
@@ -35,11 +64,13 @@ export const Address = ({ onChangeDefaultAddress }: AddressProps) => {
     <>
       <Box
         sx={{
-          display: 'flex',
+          display: isVisible ? 'flex' : 'none',
           alignItems: 'center',
           color: 'textAndIcon.lightest',
           gap: 1,
           height: 40,
+          userSelect: 'none',
+          cursor: 'pointer',
         }}
         onClick={() => setOpenBottomSheet(true)}
       >
@@ -60,7 +91,7 @@ export const Address = ({ onChangeDefaultAddress }: AddressProps) => {
               onClick={() => push('/address')}
             />
           </Box>
-          <Stack gap={4}>
+          <Stack sx={{ height: 'calc(100% - 90px)', overflowY: 'auto' }} gap={4}>
             <Box
               sx={{ bgcolor: 'background.light', color: 'textAndIcon.darker', borderRadius: 2, py: 1, px: 2, mx: 4 }}
             >
@@ -75,6 +106,7 @@ export const Address = ({ onChangeDefaultAddress }: AddressProps) => {
               <Stack sx={{ px: 2, gap: 4 }}>
                 {addressData?.data?.map(address => (
                   <AddressItem
+                    disabled={changeDefaultPending}
                     {...{
                       id: address?.id ?? '',
                       address: `${address?.prefixAddress} پلاک ${address?.plaque} واحد ${address?.unit}`,
@@ -83,6 +115,7 @@ export const Address = ({ onChangeDefaultAddress }: AddressProps) => {
                       title: address?.title ?? '',
                       hasNeedToCorrection: address.hasNeedToCorrection ?? false,
                     }}
+                    removeSuccess={removeCliently}
                     key={address?.id}
                   />
                 ))}

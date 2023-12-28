@@ -115,7 +115,6 @@ const Map = (props: MapProps) => {
           <Image alt="" layout="fill" src={markerProps?.src ?? (markerDefaultOptions.src as string)} />
         </Box>
       )}
-      {/* If showNavigator true render a Box in bottom 8px and right 8px */}
       {!!onNavigationChanged && (
         <Box sx={{ position: 'absolute', bottom: 8, left: 8 }}>
           <Button onClick={handleGeoLocation} sx={{ height: 40, width: 40 }} variant="neutral2">

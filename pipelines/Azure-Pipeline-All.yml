@@ -45,24 +45,6 @@ stages:
                 docker tag $(dockerRegistry)/frontend/dartilq:$(Build.BuildNumber) $(dockerRegistry)/frontend/dartilq:$(Build.SourceBranchName)
                 docker push $(dockerRegistry)/frontend/dartilq:$(Build.SourceBranchName)
 
-  - stage: Deploy_DartilQ_Develop
-    displayName: Deploy_DartilQ
-    condition: and(succeeded(),eq(variables['Build.SourceBranchName'] , 'develop'))
-    dependsOn: Build_DartilQ
-    jobs:
-      - job: Deploy
-        displayName: 'Deploying DartilQ Develop '
-        steps:
-          - task: Bash@3
-            displayName: 'Deploy_DartilQ_Develop'
-            inputs:
-              targetType: 'inline'
-              script: |
-                docker compose -f dockerfiles/docker-compose-develop.yml kill dev-qcommerce || true
-                docker compose -f dockerfiles/docker-compose-develop.yml up -d dev-qcommerce
-              failOnStdErr: false
-              readyTimeout: '20000'
-
   - stage: Gitops_DartilQ
     displayName: Gitops DartilQ Frontend project
     dependsOn: Build_DartilQ
@@ -128,7 +110,6 @@ stages:
     displayName: CleanUP
     dependsOn:
       - Deploy_DartilQ_Stage
-      - Deploy_DartilQ_Develop
 
     jobs:
       - job: cleanUpWorkspace

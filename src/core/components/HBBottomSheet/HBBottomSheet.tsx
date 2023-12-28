@@ -2,7 +2,7 @@
 import { backdropClasses, Box, Divider, styled, SwipeableDrawer } from '@mui/material'
 import { paperClasses } from '@mui/material/Paper'
 import type { SxProps, Theme } from '@mui/material/styles'
-import type { PropsWithChildren, ReactNode } from 'react'
+import type { PropsWithChildren, ReactNode, TouchEvent } from 'react'
 
 type BottomSheetProps = {
   open: boolean
@@ -12,6 +12,8 @@ type BottomSheetProps = {
   hidePuller?: boolean
   sx?: SxProps<Theme>
   height?: number | string
+  hideDivider?: boolean
+  onTouchStart?: (event: TouchEvent<HTMLDivElement>) => void
 }
 
 const Puller = styled(Box)(({ theme }) => ({
@@ -25,7 +27,7 @@ const Puller = styled(Box)(({ theme }) => ({
 }))
 
 export const HBBottomSheet = (props: PropsWithChildren<BottomSheetProps>) => {
-  const { open, onClose, children, header, fullScreen, hidePuller, sx, height } = props
+  const { open, onClose, children, header, fullScreen, hidePuller, sx, height, hideDivider, onTouchStart } = props
 
   return (
     <SwipeableDrawer
@@ -34,6 +36,7 @@ export const HBBottomSheet = (props: PropsWithChildren<BottomSheetProps>) => {
       onClose={onClose}
       onOpen={() => undefined}
       disableSwipeToOpen
+      onTouchStart={onTouchStart}
       sx={{
         zIndex: 100,
         maxWidth: 'sm',
@@ -54,18 +57,16 @@ export const HBBottomSheet = (props: PropsWithChildren<BottomSheetProps>) => {
         ...sx,
       }}
     >
-      <Box>
-        {!hidePuller ? (
-          <Box sx={{ height: 40 }}>
+      <Box sx={{ height: '100%' }}>
+        {!hidePuller && (
+          <Box sx={{ height: 24 }}>
             <Puller />
           </Box>
-        ) : (
-          <Box mt={2} />
         )}
         {header && (
           <>
-            <Box px={2}>{header}</Box>
-            <Divider sx={{ my: 2, borderColor: 'background.neutral' }} />
+            <Box p={2}>{header}</Box>
+            {!hideDivider && <Divider sx={{ my: 2, borderColor: 'background.neutral' }} />}
           </>
         )}
         {children}

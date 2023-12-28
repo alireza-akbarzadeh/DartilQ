@@ -4,13 +4,14 @@ import {
   Box,
   ClickAwayListener,
   debounce,
+  Divider,
   List,
   ListItemButton,
   outlinedInputClasses,
   Stack,
   Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 
 import { HBIcon } from '@/core/components'
 import { HBTextField } from '@/core/components/HBTextField/HBTextField'
@@ -18,16 +19,20 @@ import { neutral } from '@/core/providers/material/theme'
 import { getWebLocalityMapsGetStreets } from '@/services/locality-services/locality'
 import { SearchBoxProps, searchType } from '@/shared/map/map-types'
 
+import { CitySelect } from './CitySelect'
+
 export const SearchBox = (props: SearchBoxProps) => {
   const { onSearchMounted, addressInformation } = props
   const [searchValue, setSearchValue] = useState('')
   const [searchList, setSearchList] = useState<searchType[]>([])
   const [isOpen, setIsOpen] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   const [isFetching, setIsFetching] = useState(false)
 
   const handleSearch = (value: string): void => {
     if (!value) return
+    setIsOpen(false)
     setSearchList([])
     setIsFetching(true)
     getWebLocalityMapsGetStreets({ limit: 20, street: value })
@@ -68,9 +73,9 @@ export const SearchBox = (props: SearchBoxProps) => {
     setIsOpen(false)
   }
 
-  const onSearchChanged = (value: string) => {
-    setSearchValue(value)
-    debouncedHandleSearch(value)
+  const onSearchChanged = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setSearchValue(event?.target?.value)
+    debouncedHandleSearch(event?.target?.value)
   }
 
   return (
@@ -88,12 +93,17 @@ export const SearchBox = (props: SearchBoxProps) => {
           right: 8,
           backgroundColor: theme => theme.palette.common.white,
           borderRadius: 2,
-          border: `1px solid ${neutral[300]}`,
+          border: theme => `1px solid ${theme.palette.border.light}`,
         }}
         onClick={event => event.stopPropagation()}
       >
         <Stack alignItems="center" flexDirection="row" onClick={event => event.stopPropagation()}>
-          {/* <CitySelect/> */}
+          <CitySelect
+            onChange={location => onSearchMounted?.({ location: { center: location } })}
+            cityId={addressInformation?.cityId}
+            isHide={isFocused}
+          />
+          {!isFocused && <Divider orientation="vertical" flexItem sx={{ borderColor: 'border.lighter' }} />}
           <HBTextField
             InputProps={{
               startAdornment: (
@@ -117,10 +127,12 @@ export const SearchBox = (props: SearchBoxProps) => {
             value={searchValue}
             onChange={onSearchChanged}
             size="small"
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
           />
         </Stack>
         {isFetching && (
-          <Typography bgcolor="common.white" p={2} variant="subtitle1">
+          <Typography borderRadius={2} bgcolor="common.white" p={2} variant="subtitle1">
             در حال جستجو
           </Typography>
         )}

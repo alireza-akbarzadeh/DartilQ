@@ -1,3 +1,4 @@
+'use client'
 import { SxProps, Theme, Typography } from '@mui/material'
 import { Variant } from '@mui/material/styles/createTypography'
 import { intervalToDuration } from 'date-fns'
@@ -6,7 +7,7 @@ import { FC, ReactNode, useEffect, useState } from 'react'
 import { HBIcon } from '../HBIcon/HBIcon'
 import { HBCountDownTimerRootStyle, RefreshCodeStyle } from './HBCountDownTimer.styles'
 
-export type HBCountDownTimerProps = {
+type HBCountDownTimerProps = {
   targetDate: number | Date
   linkText: ReactNode
   onClick?: () => void
@@ -16,11 +17,12 @@ export type HBCountDownTimerProps = {
   maximumShowed?: 'second' | 'minute' | 'hours' | 'days'
   onFinished?: () => void
   textVariant?: Variant
+  dateNow?: number
 }
 
 const maximumShowedArray = ['second', 'minute', 'hours', 'days']
 
-export const HBCountDownTimer: FC<HBCountDownTimerProps> = props => {
+const HBCountDownTimer: FC<HBCountDownTimerProps> = props => {
   const {
     extraTimerText,
     targetDate: targetDateProps,
@@ -30,10 +32,11 @@ export const HBCountDownTimer: FC<HBCountDownTimerProps> = props => {
     maximumShowed = 'days',
     onFinished,
     textVariant = 'bodySmall',
+    dateNow,
   } = props
   const [targetDate, setTargetDate] = useState<number | Date | undefined>(targetDateProps)
   const remaining = () => {
-    const now = new Date()
+    const now = dateNow || new Date()
     const end = new Date(targetDate as number)
     if (now < end)
       return intervalToDuration({
@@ -145,4 +148,6 @@ export const HBCountDownTimer: FC<HBCountDownTimerProps> = props => {
 }
 
 HBCountDownTimer.displayName = 'HBCountDownTimer'
-HBCountDownTimer.defaultProps = {}
+
+export type { HBCountDownTimerProps }
+export { HBCountDownTimer }

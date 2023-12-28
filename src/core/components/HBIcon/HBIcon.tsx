@@ -1,4 +1,3 @@
-'use client'
 import { SxProps, Theme } from '@mui/material'
 
 import { HBIconType, IconSize } from '@/core/components/HBIcon/HBIcon.types'

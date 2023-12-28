@@ -2,11 +2,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Box, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { forwardRef, memo, useEffect, useState } from 'react'
 
 import { HBBottomSheet, HBIcon, HBNextImage } from '@/core/components'
 import { useGetCategoryCategories } from '@/services/Qcommerce Bff-services/Qcommerce Bff'
-import { RoundedBoxContainer } from '@/shared/componets/RoundedBoxContainer'
+import { CategoryModel } from '@/services/Qcommerce Bff-services/Qcommerce Bff.schemas'
+import { CategoryLoader, RoundedBoxContainer } from '@/shared/components'
+import { useScale } from '@/shared/hooks/useScale'
 
 const ANIMATION_DURATION = 5000
 
@@ -18,16 +21,32 @@ export const Category = memo(
   forwardRef<HTMLDivElement, CategoryProps>((props, ref): JSX.Element => {
     const { curveColor } = props
     const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false)
+    const { data: userSession } = useSession()
+    const defaultAddress = userSession?.user.address
 
-    const { data: categoriesData, isLoading } = useGetCategoryCategories()
+    const { data: categoriesData, isLoading } = useGetCategoryCategories({
+      CityId: defaultAddress?.cityId,
+      Latitude: defaultAddress?.latitude,
+      Longitude: defaultAddress?.longitude,
+    })
     const [isFirstloading, setIsFirstloading] = useState<boolean>(isLoading)
     const { push } = useRouter()
+    const scale = useScale()
 
     useEffect(() => {
       if (!isLoading) {
         setTimeout(() => setIsFirstloading(false), ANIMATION_DURATION + 1000)
       }
     }, [isLoading])
+
+    const navigateToCategory = (category: CategoryModel) => {
+      const url = `/category/${category.latinName}${category.isLeaf ? `?name=${category.name}` : ''}`
+      push(url)
+    }
+
+    if (isLoading) {
+      return <CategoryLoader />
+    }
 
     return (
       <>
@@ -37,24 +56,25 @@ export const Category = memo(
             alignItems: 'center',
             flexDirection: 'column',
             bgcolor: 'primary.main',
-            pt: 2,
-            gap: 4,
+            pt: scale(2),
+            gap: scale(4),
             position: 'relative',
-            pb: 8,
+            pb: scale(8),
             '&:after': {
               content: '""',
               display: 'block',
               position: 'absolute',
               borderRadius: '0 90%  0 0',
               width: '100%',
-              height: 20,
+              height: scale(20),
               backgroundColor: curveColor,
-              bottom: -1,
+              bottom: scale(-1),
             },
+            marginTop: -10,
           }}
         >
           <RoundedBoxContainer
-            size={355}
+            size={scale(355)}
             data={categoriesData?.data?.categories ?? []}
             showAnimation={isFirstloading}
             animationDuration={ANIMATION_DURATION}
@@ -65,15 +85,19 @@ export const Category = memo(
               justifyContent: 'center',
               alignItems: 'center',
               color: 'textAndIcon.lightest',
-              height: 70,
-              pb: 4,
+              height: scale(50),
+
               cursor: 'pointer',
+              marginTop: -2,
             }}
             onClick={() => setOpenBottomSheet(true)}
             ref={ref}
           >
             {(categoriesData?.data?.categories?.length ?? 0) > 7 ? (
-              <Typography variant="bodySmall">همه دسته‌بندی‌ها</Typography>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Typography variant="bodySmall">همه دسته‌بندی‌ها</Typography>
+                <HBIcon name="angleUp" />
+              </Box>
             ) : null}
           </Box>
         </Box>
@@ -103,10 +127,10 @@ export const Category = memo(
                     px: 4,
                     cursor: 'pointer',
                   }}
-                  onClick={() => push(`/category/${category.id}`)}
+                  onClick={() => navigateToCategory(category)}
                   key={category.id}
                 >
-                  <HBNextImage alt="" height={40} src={category?.icon ?? ''} width={40} />
+                  <HBNextImage alt="" height={40} src={category?.iconPath ?? ''} width={40} />
                   <Typography variant="labelMedium">{category?.name}</Typography>
                 </Box>
               ))}

@@ -3,8 +3,7 @@
 import { Box, Stack, Typography } from '@mui/material'
 
 import { HomePageViewStore } from '@/services/Qcommerce Bff-services/Qcommerce Bff.schemas'
-
-import { SellerCard } from './SellerCard'
+import { SellerCard } from '@/shared/components'
 
 interface NearbyStoresProps {
   stores?: HomePageViewStore[] | null

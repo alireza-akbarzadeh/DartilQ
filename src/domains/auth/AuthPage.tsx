@@ -1,6 +1,6 @@
 'use client'
 
-import { ComponentType } from 'react'
+import { ComponentType, useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
 import { StepEnum } from './authType.d'
@@ -23,8 +23,13 @@ const stepRenderer: Record<StepEnum, ComponentType> = {
 export const AuthPage = () => {
   const { step } = useAuthStore()
 
-  const methods = useForm({ mode: 'onChange' })
+  const methods = useForm({ mode: 'onSubmit' })
   const ComponentRender = stepRenderer[step]
+
+  useEffect(() => {
+    return () => undefined
+  }, [])
+
   return (
     <FormProvider {...methods}>
       <ComponentRender />

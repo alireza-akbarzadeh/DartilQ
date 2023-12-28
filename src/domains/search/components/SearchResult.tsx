@@ -8,10 +8,10 @@ import { HBIcon } from '@/core/components'
 import { neutral } from '@/core/providers/material/theme'
 import { useGetViewSearchView } from '@/services/Qcommerce Bff-services/Qcommerce Bff'
 import { StoreSearchView } from '@/services/Qcommerce Bff-services/Qcommerce Bff.schemas'
-import { useInfiniteScroll } from '@/shared/hooks'
+import { ProductCard } from '@/shared/components'
+import { useInfiniteScroll } from '@/shared/hooks/useInfiniteScroll'
 
 import { useSearch } from '../hooks'
-import { SearchCard } from './SearchCard'
 import { SearchedVendor } from './SearchedVendor'
 import { SearchNotFound } from './SearchNotFound'
 import { SearchSkeleton } from './SearchSkeleton'
@@ -132,7 +132,7 @@ const SearchResult = (props: SearchResultProps) => {
               <CarouselRender>
                 {store.products?.slice(0, productsRenderCount).map(product => (
                   <CarouselProductBox key={product.id}>
-                    <SearchCard {...product} />
+                    <ProductCard {...product} hideAddToBasket />
                   </CarouselProductBox>
                 ))}
                 {(store?.products?.length ?? 0) > productsRenderCount && (

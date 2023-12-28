@@ -1,9 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 
-export const useIsInViewport = (ref: Element) => {
+export const useIsInViewport = (ref: Element, option?: IntersectionObserverInit) => {
   const [isIntersecting, setIsIntersecting] = useState(false)
-
-  const observer = useMemo(() => new IntersectionObserver(([entry]) => setIsIntersecting(entry.isIntersecting)), [])
+  const [position, setPosition] = useState<DOMRectReadOnly>()
+  DOMRectReadOnly
+  const observer = useMemo(
+    () =>
+      new IntersectionObserver(([entry]) => {
+        setPosition(entry.boundingClientRect)
+        setIsIntersecting(entry.isIntersecting)
+      }, option),
+    [],
+  )
 
   useEffect(() => {
     observer?.observe(ref ?? document.body)
@@ -13,5 +21,5 @@ export const useIsInViewport = (ref: Element) => {
     }
   }, [ref, observer])
 
-  return isIntersecting
+  return { isIntersecting, position }
 }

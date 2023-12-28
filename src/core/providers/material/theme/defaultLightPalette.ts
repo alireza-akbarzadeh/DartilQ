@@ -47,12 +47,12 @@ declare module '@mui/material/styles' {
 }
 
 const grey: ColorPartial = {
-  100: '#F0F3F5',
-  200: '#E1E3E5',
-  300: '#ABAFB2',
-  500: '#8D9399',
-  700: '#676E73',
-  900: '#40464D',
+  100: colors.grey[100],
+  200: colors.grey[200],
+  300: colors.grey[300],
+  500: colors.grey[500],
+  700: colors.grey[700],
+  900: colors.grey[900],
 }
 
 const common = {
@@ -133,7 +133,7 @@ const text: TypeText = {
 const textAndIcon: TextAndIconType = {
   lightest: colors.neutral[50],
   lighter: colors.neutral[200],
-  light: colors.neutral[500],
+  light: colors.neutral[600],
   dark: colors.neutral[700],
   darker: colors.neutral[800],
 }

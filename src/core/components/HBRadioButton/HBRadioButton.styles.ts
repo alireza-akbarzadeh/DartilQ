@@ -17,6 +17,14 @@ export const HBSelectedRadio = styled('span')(props => ({
   },
 }))
 
+export const HBSelectedCheckRadio = styled('div')(props => ({
+  borderRadius: '50%',
+  width: 25,
+  height: 25,
+  color: `inset 0 0 0 6px ${props.theme.palette.common.white}`,
+  backgroundColor: props.theme.palette.primary.main,
+}))
+
 export const HBUnSelectedRadio = styled(HBSelectedRadio)(props => ({
   backgroundColor: props.theme.palette.grey[200],
   boxShadow: 'none',

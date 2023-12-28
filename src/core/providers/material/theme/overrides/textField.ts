@@ -13,6 +13,7 @@ type MuiTextFieldType = Components['MuiTextField']
 const textField: MuiTextFieldType = {
   styleOverrides: {
     root: {
+      position: 'relative',
       [`& .${inputBaseClasses.input}`]: {
         padding: '12.5px 12px',
         [`&.${inputBaseClasses.inputSizeSmall}`]: {
@@ -67,6 +68,12 @@ const textField: MuiTextFieldType = {
       '& input[type=number]::-webkit-inner-spin-button, & input[type=number]::-webkit-outer-spin-button': {
         '-webkit-appearance': 'none',
         margin: 0,
+      },
+      [`& .${formHelperTextClasses.root}`]: {
+        width: 'calc(100% - 32px)',
+        position: 'absolute',
+        bottom: -8,
+        left: 0,
       },
     },
   },

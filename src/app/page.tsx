@@ -13,13 +13,20 @@ const Home = async () => {
   const queryClient = getQueryClientSsr()
 
   await queryClient.prefetchQuery(
-    getGetWebCMSPagesPlatformTypePlatformTypeNameNameQueryOptions(PlatformType.NUMBER_1021005, 'Dartil-Q Homepage', {
-      query: { staleTime: 500000 },
-    }),
+    getGetWebCMSPagesPlatformTypePlatformTypeNameNameQueryOptions(
+      PlatformType.NUMBER_1021005,
+      'Dartil-Q Homepage',
+      undefined,
+      {
+        query: { staleTime: 500000 },
+      },
+    ),
   )
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>{session ? <HomePage /> : <IntroLanding />}</HydrationBoundary>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      {session?.accessToken ? <HomePage /> : <IntroLanding />}
+    </HydrationBoundary>
   )
 }
 

@@ -12,10 +12,15 @@ type HeaderProps = {
 }
 
 export const Header = ({ categoryRef, onChangeDefaultAddress }: HeaderProps) => {
-  const isCategoryVisible = useIsInViewport(categoryRef)
+  const { isIntersecting, position } = useIsInViewport(categoryRef)
+  const isCategoryVisible = isIntersecting || (position?.top ?? 0) > 0
   const { push } = useRouter()
   const navigateToSearch = () => {
     push('/search')
+  }
+
+  const navigateToWallet = () => {
+    push('/wallet')
   }
 
   return (
@@ -48,6 +53,7 @@ export const Header = ({ categoryRef, onChangeDefaultAddress }: HeaderProps) => 
             bgcolor: isCategoryVisible ? 'primary.dark' : 'background.light',
             color: isCategoryVisible ? 'common.white' : 'textAndIcon.darker',
           }}
+          onClick={() => push('/profile')}
         >
           <HBIcon name="user" />
         </HBRoundedBox>
@@ -75,11 +81,12 @@ export const Header = ({ categoryRef, onChangeDefaultAddress }: HeaderProps) => 
             bgcolor: isCategoryVisible ? 'primary.dark' : 'background.light',
             color: isCategoryVisible ? 'common.white' : 'textAndIcon.darker',
           }}
+          onClick={navigateToWallet}
         >
           <HBIcon name="wallet" />
         </HBRoundedBox>
       </Box>
-      {isCategoryVisible && <Address onChangeDefaultAddress={onChangeDefaultAddress} />}
+      <Address onChangeDefaultAddress={onChangeDefaultAddress} isVisible={isCategoryVisible} />
     </Stack>
   )
 }

@@ -1,9 +1,11 @@
 'use client'
+import '../../public/styles.css'
+
 import createCache, { EmotionCache } from '@emotion/cache'
 import { Container } from '@mui/material'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import dynamic from 'next/dynamic'
+import Script from 'next/script'
 import { SessionProvider } from 'next-auth/react'
 import { useMemo } from 'react'
 import { Toaster } from 'react-hot-toast'
@@ -13,10 +15,6 @@ import { CustomStyledProvider, MaterialProvider } from '@/core/providers/materia
 import { getQueryClient } from '@/core/utils/getClientQuery'
 
 import { fnUseSW } from '../../public/pwa-sw'
-
-const LanguageProvider = dynamic(() =>
-  import('@/core/providers/LanguageProvider').then(module => module.LanguageProvider),
-)
 
 // Create rtl cachex
 const createEmotionCache = (isRtl?: boolean): EmotionCache =>
@@ -41,17 +39,17 @@ const ClientLayout = ({ children }: { children: React.ReactNode }): JSX.Element 
         },
       })}
     >
+      <Script src="/liveStreamScript.js" />
       <Container
         maxWidth="sm"
-        sx={{ minHeight: '100vh', height: '100vh', py: { xs: 0 }, px: { xs: 0 }, width: '100%' }}
+        sx={{ minHeight: '100dvh', height: '100dvh', py: { xs: 0 }, px: { xs: 0 }, width: '100%' }}
+        id="root"
       >
         <SessionProvider refetchInterval={3 * 60}>
           <QueryClientProvider client={getQueryClient()}>
             <ReactQueryDevtools initialIsOpen={false} />
-            <LanguageProvider>
-              <Toaster />
-              <CustomStyledProvider cache={clientSideEmotionCache}>{children}</CustomStyledProvider>
-            </LanguageProvider>
+            <Toaster />
+            <CustomStyledProvider cache={clientSideEmotionCache}>{children}</CustomStyledProvider>
           </QueryClientProvider>
         </SessionProvider>
       </Container>

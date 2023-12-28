@@ -1,6 +1,12 @@
 import { CallbacksOptions, NextAuthOptions, Session } from 'next-auth'
 import { JWT } from 'next-auth/jwt'
 
+import { SessionAddress } from '@/domains/address'
+
+type SessionType = Omit<Parameters<CallbacksOptions['session']>[0], 'token'>
+
+type f = Omit<Parameters<CallbacksOptions['jwt']>[0], 'session' | 'token' | 'user'>
+
 export type AuthToken = {
   access_token: string
   refresh_token: string
@@ -9,16 +15,11 @@ export type AuthToken = {
   user: Session['user']
   error?: string | null
 } & JWT
-
-type f = Omit<Parameters<CallbacksOptions['jwt']>[0], 'session' | 'token' | 'user'>
-
 export type JWTCallbackParameterType = f & {
   token: AuthToken
   user: Partial<AuthToken>
   session: Partial<Session['user']>
 }
-
-type SessionType = Omit<Parameters<CallbacksOptions['session']>[0], 'token'>
 
 export type SessionCallbackParameterType = Omit<SessionType, 'token'> & {
   token: AuthToken
@@ -77,4 +78,15 @@ export type AccessToken = {
   password?: string
   refresh_token?: string
   tinyToken?: string
+}
+
+export type UserType = {
+  firstName: string
+  lastName: string
+  partyId: string
+  partyRoleId: string
+  userName: string
+  isSurrogateUser: boolean
+  avatarUrl?: string
+  address?: SessionAddress
 }

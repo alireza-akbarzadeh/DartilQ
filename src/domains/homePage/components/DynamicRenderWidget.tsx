@@ -1,8 +1,10 @@
 'use client'
 
-import { Box, Stack } from '@mui/material'
+import { Stack } from '@mui/material'
 import { Fragment, memo, useMemo } from 'react'
 
+import { LiveWidget } from '@/domains/homePage/components/LiveWidget'
+import { SliderBannerWidget } from '@/domains/homePage/components/SliderBannerWidget'
 import { useGetWebCMSPagesPlatformTypePlatformTypeNameName } from '@/services/cms-services/cms'
 import { PlatformType, SectionByContentQueryResult } from '@/services/cms-services/cms.schemas'
 
@@ -15,16 +17,21 @@ const renderWidget = (widget: SectionByContentQueryResult) => {
     BUSINESS_SLIDER_SELLER: (
       <SellerWidget metadata={JSON.parse(widget?.content?.metaData || '{}')} title={widget?.content?.title} />
     ),
-    ADS_SLIDER_DEFAULT: <Box />,
-    Live: <Box />,
+    ADS_SLIDER_DEFAULT: <SliderBannerWidget data={widget?.content?.data} />,
+    Live: <LiveWidget metadata={JSON.parse(widget?.content?.metaData || '{}')} />,
   }
 
   return selector[widget?.componentType as widgetComponentType]
 }
-export const DynamicRenderWidget = memo(() => {
-  const { data } = useGetWebCMSPagesPlatformTypePlatformTypeNameName(PlatformType.NUMBER_1021005, 'Dartil-Q Homepage', {
-    query: { staleTime: 500000 },
-  })
+const DynamicRenderWidget = memo(() => {
+  const { data } = useGetWebCMSPagesPlatformTypePlatformTypeNameName(
+    PlatformType.NUMBER_1021005,
+    'Dartil-Q Homepage',
+    undefined,
+    {
+      query: { staleTime: 500000 },
+    },
+  )
 
   const sections = useMemo(() => data?.data?.pageParts?.[0]?.sections, [data])
 
@@ -36,3 +43,5 @@ export const DynamicRenderWidget = memo(() => {
 })
 
 DynamicRenderWidget.displayName = 'DynamicRenderWidget'
+
+export { DynamicRenderWidget }

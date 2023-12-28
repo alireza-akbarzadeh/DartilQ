@@ -18,7 +18,7 @@ type SearchContainerProps = {
 const SearchContainer = (props: SearchContainerProps) => {
   const scrollableElementRef = useRef<HTMLDivElement>(null)
 
-  const { setSearched, searched } = useSearch()
+  const { setSearched, searched, recentSearches } = useSearch()
   const debouncedSearch = useDebounce(searched, 1000)
 
   const windowHeight = useWindowHeight()
@@ -28,7 +28,7 @@ const SearchContainer = (props: SearchContainerProps) => {
   }, [props.searched])
 
   const renderContent = () => {
-    if (!searched) return <RecentSearches />
+    if (!searched && !!recentSearches.length) return <RecentSearches />
     if (searched && props.searched !== searched) return <SuggestSearch searched={debouncedSearch} />
     return <SearchResult scrollableElementRef={scrollableElementRef} />
   }

@@ -40,7 +40,7 @@ const AppTopBar = (props: React.PropsWithChildren<AppBarProps>) => {
       )}
 
       {props.title && (
-        <Typography variant="titleMedium" color={neutral[800]}>
+        <Typography noWrap variant="titleMedium" color={neutral[800]}>
           {props.title}
         </Typography>
       )}

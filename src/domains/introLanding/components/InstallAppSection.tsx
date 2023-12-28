@@ -2,17 +2,13 @@
 import { Box, Typography, useTheme } from '@mui/material'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useIntl } from 'react-intl'
 
-import { HBButton, HBIcon } from '@/core/components'
-import { HBNextImage } from '@/core/components'
+import { HBButton, HBIcon, HBNextImage } from '@/core/components'
 
-import { introLandingMessages } from '../introLanding.messages'
 import { WrapperInstallAppButton } from './styles'
 
 export const InstallAppSection = (): JSX.Element => {
   const { spacing } = useTheme()
-  const { formatMessage } = useIntl()
   const { push } = useRouter()
   return (
     <>
@@ -52,10 +48,11 @@ export const InstallAppSection = (): JSX.Element => {
                 justifyContent: 'center',
               }}
             >
-              <Typography variant="titleMedium">{formatMessage(introLandingMessages.dartilBuy)}</Typography>
+              <Typography variant="titleMedium">با دارتیل خریدت به راهه!</Typography>
             </Box>
             <Typography variant="bodyMedium" component="div" sx={{ textAlign: 'center', wordWrap: 'break-word' }}>
-              {formatMessage(introLandingMessages.installApp)}
+              با نصب اپلیکشن دارتیل می‌تونی در هر مکان و در هر زمان به فروشگاه‌های اطرافت دسترسی داشته‌باشی و خریدت رو
+              در کمتر از ۲۴ ساعت با ارسال سریع تحویل بگیری.
             </Typography>
           </Box>
           <Box
@@ -75,7 +72,7 @@ export const InstallAppSection = (): JSX.Element => {
                   color: 'common.white',
                 }}
               >
-                <Typography variant="bodySmall">{formatMessage(introLandingMessages.downloadFrom)}</Typography>
+                <Typography variant="bodySmall">دریافت از</Typography>
                 <HBNextImage isLocal alt="cafe-bazar" height={27} src="/assets/downloadApp/bazarWhite.png" width={66} />
               </WrapperInstallAppButton>
             </Link>
@@ -86,7 +83,7 @@ export const InstallAppSection = (): JSX.Element => {
                   color: 'common.white',
                 }}
               >
-                <Typography variant="bodySmall">{formatMessage(introLandingMessages.downloadFrom)}</Typography>
+                <Typography variant="bodySmall">دریافت از</Typography>
                 <HBNextImage isLocal alt="myket" height={21} src="/assets/downloadApp/myketAppWhite.png" width={67} />
               </WrapperInstallAppButton>
             </Link>
@@ -103,7 +100,7 @@ export const InstallAppSection = (): JSX.Element => {
                     flexDirection: 'column',
                   }}
                 >
-                  <Typography variant="smallCaption">{formatMessage(introLandingMessages.downloadIosFrom)}</Typography>
+                  <Typography variant="smallCaption">دریافت نسخه ios از</Typography>
                   <HBNextImage
                     alt="sib-app-text"
                     height={17}
@@ -134,7 +131,7 @@ export const InstallAppSection = (): JSX.Element => {
                     flexDirection: 'column',
                   }}
                 >
-                  <Typography variant="smallCaption">{formatMessage(introLandingMessages.downloadIosFrom)}</Typography>
+                  <Typography variant="smallCaption">دریافت نسخه ios از</Typography>
                   <HBNextImage
                     isLocal
                     alt="sibche-text"
@@ -155,10 +152,10 @@ export const InstallAppSection = (): JSX.Element => {
               >
                 <Box>
                   <Typography color="common.white" component="div" variant="smallCaption">
-                    {formatMessage(introLandingMessages.directDownload)}
+                    دانلود مستقیم
                   </Typography>
                   <Typography color="common.white" component="div" variant="caption">
-                    {formatMessage(introLandingMessages.androidApp)}
+                    اپلیکیشن اندروید
                   </Typography>
                 </Box>
                 <HBIcon sx={{ color: '#9EBC4A' }} name="android" />
@@ -172,13 +169,12 @@ export const InstallAppSection = (): JSX.Element => {
               position: 'relative',
               minHeight: 120,
             }}
-          ></Box>
+          />
         </Box>
         <Box
           sx={{
             height: 175,
             width: '100%',
-            paddingLeft: 4,
             display: 'flex',
             justifyContent: 'center',
             backgroundColor: 'common.white',
@@ -187,11 +183,11 @@ export const InstallAppSection = (): JSX.Element => {
         >
           <HBNextImage
             alt="bazarWhite"
-            height={350}
+            height={330}
             src="/assets/png/banner.png"
-            width={340}
+            width={274}
             style={{
-              marginTop: -180,
+              marginTop: -170,
             }}
             isLocal
           />
@@ -200,11 +196,12 @@ export const InstallAppSection = (): JSX.Element => {
       <Box sx={{ backgroundColor: 'textAndIcon.darker' }}>
         <Box
           sx={{
-            height: 230,
+            height: 210,
             width: '100%',
             backgroundColor: 'common.white',
             borderRadius: '25% 25% 5% 90% / 0% 0% 0% 7%',
-            padding: spacing(11, 4, 4, 4),
+            px: 4,
+            py: 6,
           }}
         >
           <Box
@@ -222,10 +219,10 @@ export const InstallAppSection = (): JSX.Element => {
               }}
             >
               <Typography variant="titleMedium" sx={{ textAlign: 'center', wordWrap: 'break-word', height: 28 }}>
-                {formatMessage(introLandingMessages.ownBusiness)}
+                صاحب کسب و کار هستید؟
               </Typography>
               <Typography variant="bodyMedium" component="div" sx={{ textAlign: 'center', wordWrap: 'break-word' }}>
-                {formatMessage(introLandingMessages.onlineBusiness)}
+                با دارتیل کسب و کارتان را آنلاین کنید و فروشتان را افزایش دهید
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -236,7 +233,7 @@ export const InstallAppSection = (): JSX.Element => {
                   push('https://dartil.com/seller-landing/')
                 }}
               >
-                <Typography variant="bodySmall">{formatMessage(introLandingMessages.sellerRegister)}</Typography>
+                <Typography variant="bodySmall">ثبت نام فروشندگان</Typography>
               </HBButton>
             </Box>
           </Box>

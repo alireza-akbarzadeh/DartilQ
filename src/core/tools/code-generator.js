@@ -59,6 +59,10 @@ const codeGenerator = async (baseURL, idsBaseURL, destination) => {
               path: customInstancePath,
               name: 'customInstance',
             },
+            query: {
+              useQuery: true,
+              useInfinite: true,
+            },
           },
         },
         input: {
@@ -73,7 +77,6 @@ const codeGenerator = async (baseURL, idsBaseURL, destination) => {
     console.error('Error generating code:', error)
   }
 }
-
 const destination = `../../../${process.argv[2]}`
 const envPath = `.env`
 dotenv.config({ path: envPath })

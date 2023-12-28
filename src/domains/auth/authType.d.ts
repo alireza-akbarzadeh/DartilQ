@@ -2,6 +2,12 @@
 
 import { BusinessFlow, Security } from '@/services/ids-services/ids.schemas'
 
+type SettingType = {
+  businessFlow: BusinessFlow
+  loginScopes?: string[] | null
+  security?: Security
+}
+
 export enum DefaultLoginType {
   Otp = 'otp',
   Password = 'password',
@@ -20,12 +26,6 @@ export enum StepEnum {
   forgetPassword = 'forgetPassword',
   signUpInformation = 'signUpInformation',
   setPassword = 'setPassword',
-}
-
-type SettingType = {
-  businessFlow: BusinessFlow
-  loginScopes?: string[] | null
-  security?: Security
 }
 
 export type AuthStoreType = {

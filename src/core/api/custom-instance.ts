@@ -1,14 +1,18 @@
 import Axios, { AxiosError, AxiosRequestConfig } from 'axios'
+import { getServerSession } from 'next-auth'
 import { getSession, signOut } from 'next-auth/react'
 import toast from 'react-hot-toast'
 
 import { ApiConstants } from '../constants'
+import { nextAuthOptions } from './next-auth-options'
 
 const axiosInstance = Axios.create({ baseURL: process.env.NEXT_PUBLIC_GATEWAY })
 
+const isServer = typeof window === 'undefined'
+
 axiosInstance.interceptors.request.use(
   async config => {
-    const session = await getSession()
+    const session = isServer ? await getServerSession(nextAuthOptions) : await getSession()
     const tokenType = 'Bearer'
 
     if (config.headers) {
@@ -29,25 +33,24 @@ axiosInstance.interceptors.request.use(
 )
 
 // Add a second `options` argument here if you want to pass extra options to each generated query
-export const customInstance = <T>(config: AxiosRequestConfig, options?: AxiosRequestConfig): Promise<T> => {
-  const source = Axios.CancelToken.source()
+const customInstance = <T>(config: AxiosRequestConfig, options?: AxiosRequestConfig): Promise<T> => {
   const promise = axiosInstance({
     ...config,
     ...options,
-    cancelToken: source.token,
   })
     .then(({ data }) => {
       return data
     })
     .catch(error => {
-      if (typeof window !== 'undefined' && Number(error?.status)) {
-        const expectedError = error?.status && Number(error?.status) >= 400 && Number(error?.status) < 500
+      if (typeof window !== 'undefined' && Number(error?.response?.status)) {
+        const expectedError =
+          error?.response?.status && Number(error?.response?.status) >= 400 && Number(error?.response?.status) < 500
 
-        if (error?.status === 401) {
-          signOut()
+        if (error?.response?.status === 401) {
+          signOut({ callbackUrl: '/' })
         } else if (expectedError) {
-          if (error?.Code === 'exception' || error?.Code === 'BadRequest') {
-            toast(error.messages)
+          if (error?.code === 'exception' || error?.code === 'ERR_BAD_REQUEST') {
+            toast(error?.response?.data?.messages?.[0]?.message)
           }
         } else {
           toast('مشکلی در سرور به وجود آمده است')
@@ -66,6 +69,9 @@ export const customInstance = <T>(config: AxiosRequestConfig, options?: AxiosReq
 }
 
 // In some case with react-query and swr you want to be able to override the return error type so you can also do it here like this
-export type ErrorType<Error> = AxiosError<Error>
+type ErrorType<Error> = AxiosError<Error>
 
-export type BodyType<BodyData> = BodyData
+type BodyType<BodyData> = BodyData
+
+export { axiosInstance, customInstance }
+export type { BodyType, ErrorType }

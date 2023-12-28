@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 /**
  * `useInfiniteScroll` is a custom hook that enables infinite scrolling functionality.
  * It uses the Intersection Observer API to detect when the last element of a list comes into the viewport.
@@ -33,28 +34,23 @@
  *   );
  * };
  */
-
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
-
 const useInfiniteScroll = (
   callback: VoidFunction,
   scrollableElementRef?: React.RefObject<HTMLElement>,
 ): [Dispatch<SetStateAction<Element | null>>] => {
   const observer = useRef<IntersectionObserver | null>(null)
   const [lastElement, setLastElement] = useState<Element | null>(null)
-
   useEffect(() => {
     if (observer.current) observer.current.disconnect()
 
     observer.current = new IntersectionObserver(entries => {
-      const scrollPosition = scrollableElementRef?.current?.scrollTop || window.scrollY
-      if (entries[0].isIntersecting && scrollPosition > 0) {
+      if (entries[0].isIntersecting) {
         callback()
       }
     })
 
     if (lastElement) observer.current.observe(lastElement)
-  }, [lastElement])
+  }, [lastElement, scrollableElementRef])
 
   return [setLastElement]
 }

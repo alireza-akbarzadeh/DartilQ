@@ -1,10 +1,11 @@
 import { Theme } from '@mui/material'
 
-import { button, textField } from './overrides'
+import { button, switchComponent, textField } from './overrides'
 
 const overrides: Theme['components'] = {
   MuiButton: button,
   MuiTextField: textField,
+  MuiSwitch: switchComponent,
 }
 
 export { overrides }

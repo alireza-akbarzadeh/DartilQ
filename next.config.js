@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: false,
   images: {
     deviceSizes: [360, 512],
     remotePatterns: [
@@ -15,12 +16,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'cdn-stage.hasti.co',
-        pathname: '**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn.dartil.com',
+        hostname: 'assets.hasti.co',
         pathname: '**',
       },
     ],

@@ -1,33 +1,33 @@
 'use client'
 import { Box, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
-import { FormattedMessage, useIntl } from 'react-intl'
+import { Controller, useFormContext } from 'react-hook-form'
 
-import { HBTextFieldController } from '@/core/components/HBTextField/HBTextFieldController'
-import { HBButton, HBIcon } from '@/core/components/index'
+import { HBButton, HBIcon, HBTextField } from '@/core/components/index'
+import { toEnNumConverter } from '@/core/utils/toEnNumConverter'
 import { useGetAuthCustomerGetLoginInfo, useGetAuthCustomerGetRegisterInfo } from '@/services/ids-services/ids'
 import { useGetUserMobileRoles } from '@/services/Qcommerce Bff-services/Qcommerce Bff'
+import { regexps } from '@/shared/constants'
 
-import { authMessages } from '../auth.messages'
 import { DefaultLoginType, mobileRegex, StepEnum, TypeEnum } from '../authType.d'
 import { useAuthStore } from '../hooks/useAuthStore'
 import { useHandleOtp } from '../hooks/useHandleOtp'
 import { TermsAndRules } from './TermsAndRules'
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
 export const CheckExistPhoneNumber = () => {
   const { updateStep, updateSetting, updateType } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [openTerms, setOpenTerms] = useState(false)
-  const { formatMessage } = useIntl()
 
   const {
-    formState: { isValid, errors },
+    formState: { errors },
     setError,
     getValues,
     handleSubmit,
   } = useFormContext<{ username: string }>()
-  const { handleCreateLoginOtp, handleCreateRegisterOtp } = useHandleOtp(getValues('username'))
+  const { handleCreateLoginOtp, handleCreateRegisterOtp } = useHandleOtp()
 
   const { refetch: getUserRole, isFetching } = useGetUserMobileRoles(getValues('username'), {
     query: { enabled: false },
@@ -43,54 +43,56 @@ export const CheckExistPhoneNumber = () => {
 
   const handleCheck = async () => {
     setLoading(true)
-    const roleResponse = await getUserRole()
-    try {
-      if (roleResponse?.data?.success && roleResponse?.data?.data?.flow) {
-        const [isAdmin, isCustomer] = roleResponse.data.data.flow
-        if (Number(isAdmin) + Number(isCustomer) > 0) {
-          const loginResponse = await getLoginInfo()
-          if (loginResponse.data?.businessLoginFlow) {
-            if (loginResponse.data.defaultLoginType?.toLocaleLowerCase() === DefaultLoginType.Otp) {
-              await handleCreateLoginOtp()
-            }
+    await sleep(2000)
+    getUserRole()
+      .then(async roleResponse => {
+        if (roleResponse?.data?.success && roleResponse?.data?.data?.flow) {
+          const [isAdmin, isCustomer] = roleResponse.data.data.flow
+          if (Number(isAdmin) + Number(isCustomer) > 0) {
+            const loginResponse = await getLoginInfo()
+            if (loginResponse.data?.businessLoginFlow) {
+              if (loginResponse.data.defaultLoginType?.toLocaleLowerCase() === DefaultLoginType.Otp) {
+                await handleCreateLoginOtp(getValues('username'))
+              }
 
-            updateStep(
-              loginResponse.data.defaultLoginType?.toLocaleLowerCase() === DefaultLoginType.Otp
-                ? StepEnum.otp
-                : StepEnum.password,
-            )
-            updateType(TypeEnum.login)
-            updateSetting({
-              businessFlow: loginResponse.data.businessLoginFlow,
-              loginScopes: loginResponse.data.loginScopes,
-              security: loginResponse.data.securityLogin,
-            })
-          }
-        } else {
-          const registerResponse = await getRegisterInfo()
-          if (registerResponse.data?.businessRegisterFlow) {
-            const otpRegisterRes = await handleCreateRegisterOtp()
-            if (otpRegisterRes) {
-              updateStep(StepEnum.otp)
-              updateType(TypeEnum.register)
+              updateStep(
+                loginResponse.data.defaultLoginType?.toLocaleLowerCase() === DefaultLoginType.Otp
+                  ? StepEnum.otp
+                  : StepEnum.password,
+              )
+              updateType(TypeEnum.login)
               updateSetting({
-                businessFlow: registerResponse.data.businessRegisterFlow,
-                security: registerResponse.data.securityRegister,
+                businessFlow: loginResponse.data.businessLoginFlow,
+                loginScopes: loginResponse.data.loginScopes,
+                security: loginResponse.data.securityLogin,
               })
             }
+          } else {
+            const registerResponse = await getRegisterInfo()
+            if (registerResponse.data?.businessRegisterFlow) {
+              const otpRegisterRes = await handleCreateRegisterOtp(getValues('username'))
+              if (otpRegisterRes) {
+                updateStep(StepEnum.otp)
+                updateType(TypeEnum.register)
+                updateSetting({
+                  businessFlow: registerResponse.data.businessRegisterFlow,
+                  security: registerResponse.data.securityRegister,
+                })
+              }
+            }
           }
+        } else {
+          setError('username', {
+            message: roleResponse.data?.messages?.[0]?.message ?? 'دریافت اطلاعات با خطا مواجه شد',
+          })
         }
-      } else {
-        setError('username', {
-          message: roleResponse.data?.messages?.[0]?.message ?? formatMessage(authMessages.faultMessage),
-        })
-      }
-    } catch (err) {
-      setError('username', {
-        message: err?.toString().replace('Error:', '') || '',
       })
-    }
-    setLoading(false)
+      .catch(err => {
+        setError('username', {
+          message: err?.toString().replace('Error:', '') || '',
+        })
+      })
+      .finally(() => setLoading(false))
   }
 
   return (
@@ -98,63 +100,74 @@ export const CheckExistPhoneNumber = () => {
       <form onSubmit={handleSubmit(handleCheck)}>
         <Stack spacing={4}>
           <Typography variant="bodyMedium" color="textAndIcon.darker">
-            <FormattedMessage {...authMessages.enterPhoneNumber} />
+            برای ادامه شماره موبایل خود را وارد کنید.
           </Typography>
 
-          <HBTextFieldController
+          <Controller
             name="username"
-            dir="ltr"
-            type="number"
-            autoFocus
-            defaultValue=""
-            label={<FormattedMessage {...authMessages.phoneNumber} />}
             rules={{
               pattern: {
-                message: formatMessage(authMessages.phoneNumberErrorMessage),
+                message: 'شماره موبایل وارد شده نادرست است',
                 value: new RegExp(mobileRegex),
               },
               required: {
                 value: true,
-                message: '',
+                message: 'شماره موبایل را وارد کنید',
               },
             }}
-            inputProps={{
-              inputMode: 'numeric',
-              pattern: '[0-9]*',
-              maxLength: 4,
-            }}
-            error={Boolean(errors?.username?.message?.length)}
-            helperText={
-              errors?.username?.message && (
-                <Box display="flex" alignItems="center" sx={{ direction: 'ltr' }}>
-                  <HBIcon name="exclamationTriangle" sx={{ color: 'error.main' }} size="small" />
-                  <Typography variant="bodySmall" color="error.main">
-                    {errors?.username?.message}
-                  </Typography>
-                </Box>
-              )
-            }
+            defaultValue=""
+            render={({ field: { onChange, value } }) => (
+              <HBTextField
+                onChange={val => onChange(toEnNumConverter(val))}
+                value={value}
+                dir="ltr"
+                autoFocus
+                label={'شماره موبایل'}
+                error={Boolean(errors?.username?.message?.length)}
+                onKeyDown={event => {
+                  if (
+                    !(
+                      new RegExp(regexps.allowNumbers).test(event.key) ||
+                      event.key === 'Enter' ||
+                      event.key === 'Backspace' ||
+                      event.key === 'Delete'
+                    )
+                  ) {
+                    event.stopPropagation()
+                    event.preventDefault()
+                  }
+                }}
+                helperText={
+                  errors?.username?.message && (
+                    <Box display="flex" alignItems="center" sx={{ direction: 'ltr' }}>
+                      <HBIcon name="exclamationTriangle" sx={{ color: 'error.main' }} size="small" />
+                      <Typography variant="bodySmall" color="error.main">
+                        {errors?.username?.message}
+                      </Typography>
+                    </Box>
+                  )
+                }
+                inputProps={{
+                  inputMode: 'numeric',
+                  pattern: regexps.allowNumbers,
+                  maxlength: 11,
+                }}
+                type="text"
+                sx={{ pb: 4 }}
+              />
+            )}
           />
+
           <Typography variant="bodySmall" color="textAndIcon.darker">
-            <FormattedMessage
-              {...authMessages.termsAndPrivacyRules}
-              values={{
-                b: chunks => (
-                  <Box component="span" sx={{ color: 'info.main' }} onClick={() => setOpenTerms(true)}>
-                    {chunks}
-                  </Box>
-                ),
-              }}
-            />
+            ورود شما به معنی پذیرش{' '}
+            <Box component="span" sx={{ color: 'info.main' }} onClick={() => setOpenTerms(true)}>
+              شرایط دارتیل و قوانین حریم خصوصی
+            </Box>{' '}
+            است.
           </Typography>
 
-          <HBButton
-            variant="primary"
-            type="submit"
-            disabled={!isValid || isFetching || loading}
-            loading={isFetching || loading}
-          >
-            <FormattedMessage {...authMessages.confirmAndReceiveTheCode} />
+          <HBButton variant="primary" type="submit" disabled={isFetching || loading} loading={isFetching || loading}>
+            مرحله بعد
           </HBButton>
         </Stack>
       </form>

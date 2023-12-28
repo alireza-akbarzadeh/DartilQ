@@ -6,6 +6,7 @@ type State = {
   setSearched: (value: string) => void
   recentSearches: string[]
   updateRecentSearches: (value: string, actionType: 'add' | 'remove') => void
+  clearRecentSearches: VoidFunction
 }
 
 export const useSearch = create<State>()(
@@ -25,6 +26,10 @@ export const useSearch = create<State>()(
           return { recentSearches: state.recentSearches.filter(item => item !== value) }
         })
       },
+      clearRecentSearches: () =>
+        set(() => {
+          return { recentSearches: [] }
+        }),
       recentSearches: [],
     }),
     { name: 'search', partialize: state => ({ recentSearches: state.recentSearches }) },

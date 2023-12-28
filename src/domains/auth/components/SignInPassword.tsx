@@ -5,13 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
-import { FormattedMessage } from 'react-intl'
 
 import { HBButton, HBIcon } from '@/core/components/index'
-import { PasswordTextField } from '@/shared/componets/PasswordTextField/PasswordTextField'
+import { PasswordTextField } from '@/shared/components'
 import { ProviderEnum } from '@/shared/types/enums'
 
-import { authMessages } from '../auth.messages'
 import { StepEnum, TypeEnum } from '../authType.d'
 import { useAuthStore } from '../hooks/useAuthStore'
 import { useHandleOtp } from '../hooks/useHandleOtp'
@@ -26,7 +24,7 @@ export const SignInPassword = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { handleCreateLoginOtp, handleForgetPassword } = useHandleOtp(getValues('username'))
+  const { handleCreateLoginOtp, handleForgetPassword } = useHandleOtp()
 
   const handleCallback = (): void => {
     let pathname = searchParams.toString().split('callbackUrl=')?.[1]?.replace('%3F', '?')
@@ -61,7 +59,7 @@ export const SignInPassword = () => {
   }
 
   const handleLoginWithOtp = async () => {
-    const response = await handleCreateLoginOtp()
+    const response = await handleCreateLoginOtp(getValues('username'))
     if (response) {
       updateStep(StepEnum.otp)
       updateType(TypeEnum.login)
@@ -72,13 +70,13 @@ export const SignInPassword = () => {
     <form onSubmit={handleSubmit(handleSignIn)}>
       <Stack spacing={4}>
         <Typography variant="bodyMedium" color="textAndIcon.darker">
-          <FormattedMessage {...authMessages.enterOtpCode} values={{ phoneNumber: getValues('username') }} />
+          رمز عبور خود را وارد کنید.
         </Typography>
         <PasswordTextField
-          label={<FormattedMessage {...authMessages.password} />}
-          onChange={value => {
+          label={'کلمه عبور'}
+          onChange={event => {
             setError('')
-            setPassword(value)
+            setPassword(event.target.value)
           }}
           value={password}
           autoFocus
@@ -93,30 +91,28 @@ export const SignInPassword = () => {
               </Box>
             )
           }
+          sx={{ pb: 4 }}
         />
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography color="info.main" variant="bodySmall" sx={{ cursor: 'pointer' }} onClick={handleForgetPassword}>
-            <FormattedMessage {...authMessages.forgetPassword} />
+          <Typography
+            color="info.main"
+            variant="bodySmall"
+            sx={{ cursor: 'pointer' }}
+            onClick={() => handleForgetPassword(getValues('username'))}
+          >
+            فراموشی کلمه عبور
           </Typography>
           <Typography color="info.main" variant="bodySmall" sx={{ cursor: 'pointer' }} onClick={handleLoginWithOtp}>
-            <FormattedMessage {...authMessages.loginWithOtp} />
+            ورود با رمز یکبار مصرف
           </Typography>
         </Box>
 
         <Stack direction="row" spacing={3} py={2}>
           <HBButton sx={{ flex: 1 }} variant="secondary" onClick={() => updateStep(StepEnum.checkPhoneNumber)}>
-            <FormattedMessage {...authMessages.back} />
+            بازگشت
           </HBButton>
-          <HBButton
-            variant="primary"
-            sx={{ flex: 1 }}
-            type="submit"
-            disabled={
-              Boolean(error?.length) || loading || password.length < (setting?.security?.passwordMinLength || 4)
-            }
-            loading={loading}
-          >
-            <FormattedMessage {...authMessages.nextStep} />
+          <HBButton variant="primary" sx={{ flex: 1 }} type="submit" disabled={loading} loading={loading}>
+            مرحله بعد
           </HBButton>
         </Stack>
       </Stack>

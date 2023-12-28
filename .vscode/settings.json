@@ -1,9 +1,11 @@
 {
-  "eslint.validate": ["json"],
+  "eslint.validate": [
+    "json"
+  ],
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
   "typescript.tsdk": "node_modules/typescript/lib",
   "files.watcherExclude": {
@@ -14,7 +16,11 @@
   "cSpell.words": [
     "Embla",
     "glyphy",
+    "hsin",
+    "nextauth",
     "partialize",
+    "Qcommerce",
+    "Swipeable",
     "zustand"
   ]
 }

@@ -6,7 +6,7 @@ import { HBTextField, HBTextFieldProps } from './HBTextField'
 export const HBTextFieldController = (
   props: HBTextFieldProps & Pick<ControllerProps, 'name' | 'rules' | 'defaultValue'>,
 ): JSX.Element => {
-  const { name, rules, defaultValue, ...rest } = props
+  const { name, rules, defaultValue, onBlur: onBlurProps, ...rest } = props
   const { control } = useFormContext()
 
   return (
@@ -16,7 +16,15 @@ export const HBTextFieldController = (
       rules={rules}
       defaultValue={defaultValue}
       render={({ field: { onBlur, onChange, value } }) => (
-        <HBTextField onChange={val => onChange(val)} value={value} onBlur={onBlur} {...rest} />
+        <HBTextField
+          onChange={val => onChange(val)}
+          value={value}
+          onBlur={e => {
+            onBlur()
+            onBlurProps?.(e)
+          }}
+          {...rest}
+        />
       )}
     />
   )

@@ -9,7 +9,7 @@ import {
 import { StepEnum, TypeEnum } from '../authType.d'
 import { useAuthStore } from './useAuthStore'
 
-export const useHandleOtp = (username: string) => {
+export const useHandleOtp = () => {
   const { updateOtpData, otpData, updateChangePasswordToken, updateStep, updateType } = useAuthStore()
 
   const { mutateAsync: createOtpForRegister } = usePostAuthCustomerCreateOtpForRegister()
@@ -18,7 +18,7 @@ export const useHandleOtp = (username: string) => {
   const { mutateAsync: createOtpForSetPassword } = usePostAuthCustomerCreateOTPForSetPassword()
   const { mutateAsync: validateOtpForSetPassword } = usePostAuthCustomerValidateOTPForSetPassword()
 
-  const handleCreateLoginOtp = async () => {
+  const handleCreateLoginOtp = async (username: string) => {
     const otpLoginRes = await createOtpForLogin({ data: { user: username } })
     if (otpLoginRes.otpToken) {
       updateOtpData(otpLoginRes?.otpToken, otpLoginRes?.expireDate)
@@ -26,8 +26,7 @@ export const useHandleOtp = (username: string) => {
     }
     throw Error(otpLoginRes.message || '')
   }
-
-  const handleCreateRegisterOtp = async () => {
+  const handleCreateRegisterOtp = async (username: string) => {
     const otpRegisterRes = await createOtpForRegister({
       data: { user: username },
     })
@@ -38,7 +37,7 @@ export const useHandleOtp = (username: string) => {
     throw Error(otpRegisterRes.message || '')
   }
 
-  const handleValidateOtpRegister = async (otpCode: string) => {
+  const handleValidateOtpRegister = async (otpCode: string, username: string) => {
     const response = await validateOtpForRegister({
       data: { otpCode, otpToken: otpData?.otpToken, user: username },
     })
@@ -49,7 +48,7 @@ export const useHandleOtp = (username: string) => {
     }
   }
 
-  const handleForgetPassword = async () => {
+  const handleForgetPassword = async (username: string) => {
     const response = await createOtpForSetPassword({ data: { user: username } })
     if (response.otpToken) {
       updateOtpData(response.otpToken, response?.expireDate)
@@ -60,7 +59,7 @@ export const useHandleOtp = (username: string) => {
     throw Error(response.message || '')
   }
 
-  const handleValidateOtpForForgetPassword = async (otpCode: string) => {
+  const handleValidateOtpForForgetPassword = async (otpCode: string, username: string) => {
     const response = await validateOtpForSetPassword({
       data: { otpCode, otpToken: otpData?.otpToken, user: username },
     })

@@ -1,12 +1,15 @@
 'use client'
 
 import { Stack, Typography } from '@mui/material'
+import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 import { HBButton, HBIcon } from '@/core/components/index'
 import { usePostAuthCustomerSetPassword } from '@/services/ids-services/ids'
-import { PasswordTextField } from '@/shared/componets/PasswordTextField/PasswordTextField'
+import { PasswordTextField } from '@/shared/components'
+import { regexps } from '@/shared/constants'
 
 import {
   capitalRegex,
@@ -57,13 +60,7 @@ const PasswordChecker = (props: PasswordCheckerProps) => {
   return (
     <Stack spacing={2}>
       {Object.keys(rules).map(rule => (
-        <Typography
-          variant="bodyMedium"
-          color={handleColor(rules[rule]?.isValid)}
-          key={rule}
-          display={'flex'}
-          alignItems="center"
-        >
+        <Typography variant="bodyMedium" color={'textAndIcon.darker'} key={rule} display={'flex'} alignItems="center">
           {rules[rule]?.message}
           {handleColor(rules[rule]?.isValid).includes('success') && (
             <HBIcon name="check" sx={{ color: 'success.dark', ml: 1 }} size="small" />
@@ -75,38 +72,53 @@ const PasswordChecker = (props: PasswordCheckerProps) => {
 }
 
 export const SetPassword = () => {
+  const { push } = useRouter()
   const { setting, changePasswordToken, updateStep } = useAuthStore()
   const [value, setValue] = useState('')
   const [isValid, setIsValid] = useState(false)
   const { mutateAsync, isPending } = usePostAuthCustomerSetPassword()
-  const { getValues } = useFormContext()
+  const { getValues, handleSubmit } = useFormContext()
 
   const rules = useMemo(() => {
     const rulesItem: PasswordCheckerProps['rules'] = {
-      maxLength: `طول رمز عبور حداکثر ${setting?.security?.passwordMaxLength || 20} کاراکتر باشد`,
-      minLength: `طول رمز عبور حداقل ${setting?.security?.passwordMinLength || 8} کاراکتر باشد`,
+      minLength: ` حداقل ${setting?.security?.passwordMinLength || 8} کاراکتر`,
     }
     if (setting?.security?.passwordLevel === 'Medium' || setting?.security?.passwordLevel === 'High') {
-      rulesItem.capitalChr = 'شامل حروف بزرگ لاتین باشد'
-      rulesItem.smallChr = 'شامل حروف کوچک لاتین باشد'
-      rulesItem.number = 'شامل عدد باشد'
+      rulesItem.capitalChr = 'شامل حروف بزرگ و کوچک انگلیسی'
+      rulesItem.number = 'استفاده از اعداد'
     }
-    if (setting?.security?.passwordLevel === 'High') rulesItem.specialChar = 'شامل نشانه و کاراکتر (مانند @ # $ *) باشد'
+    if (setting?.security?.passwordLevel === 'High') rulesItem.specialChar = 'شامل نشانه و کاراکتر (مانند @ # $ *) '
     return rulesItem
   }, [setting])
 
   const handleSetPassword = () => {
     mutateAsync({
       data: { newPassword: value, otpToken: changePasswordToken, userName: getValues('username') },
-    }).then(res => {
-      if (res.success) updateStep(StepEnum.checkPhoneNumber)
+    }).then(async res => {
+      if (res.success) {
+        const response = await signIn('SIGN_IN', {
+          username: getValues('username'),
+          password: value,
+          redirect: false,
+        })
+        if (response?.error || !response?.ok) updateStep(StepEnum.checkPhoneNumber)
+        else push('/')
+      }
     })
   }
 
   return (
-    <form onSubmit={() => handleSetPassword()}>
+    <form onSubmit={handleSubmit(handleSetPassword)}>
       <Stack spacing={4}>
-        <PasswordTextField label="کلمه عبور" value={value} onChange={val => setValue(val)} autoFocus />
+        <PasswordTextField
+          label="کلمه عبور"
+          inputProps={{
+            pattern: regexps.allowLetters,
+          }}
+          value={value}
+          onChange={val => setValue(val?.target?.value)}
+          autoFocus
+        />
         <PasswordChecker
           value={value}
           rules={rules}

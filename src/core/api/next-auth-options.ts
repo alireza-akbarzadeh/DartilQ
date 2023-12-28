@@ -22,7 +22,7 @@ const TOKEN_NAME = process.env.NEXT_PUBLIC_TOKEN_NAME
 const ACCESS_TOKEN_URL = `${process.env.NEXT_PUBLIC_IDS}/connect/${TOKEN_NAME}`
 const CREATE_CUSTOMER_URL = `${process.env.NEXT_PUBLIC_GATEWAY}/User/RegisterCustomer`
 const CLIENT_ID = process.env.NEXTAUTH_CREDENTIAL_CLIENT_ID
-const CLIENT_SECRET = process.env.NEXTAUTH_SECRET
+const CLIENT_SECRET = process.env.NEXTAUTH_CLIENT_SECRET
 
 const getUserAddress = async (accessToken: string): Promise<SessionAddress | undefined> => {
   try {
@@ -38,6 +38,7 @@ const getUserAddress = async (accessToken: string): Promise<SessionAddress | und
     const defaultAddress = userAddresses.data?.find(address => address.isDefault)
     if (defaultAddress)
       return {
+        id: defaultAddress?.id,
         cityId: defaultAddress?.cityId,
         latitude: defaultAddress?.latitude,
         longitude: defaultAddress?.longitude,
@@ -125,7 +126,7 @@ const fetchCustomer = async (accessToken: string, username?: string): Promise<Se
     throw new Error('خطایی در دریافت اطلاعات رخ داده است.')
   }
 
-  const userAvatar = await getAvatarCustomer(accessToken, userData?.partyId || '')
+  const userAvatar = await getAvatarCustomer(accessToken, userData?.partyId)
   const userAddress = await getUserAddress(accessToken)
   userData.avatarUrl = userAvatar
   userData.address = userAddress
@@ -188,7 +189,7 @@ const nextAuthDefaultOptions = (): NextAuthOptions => {
             )
           }
           const userData = await fetchCustomer(selectToken.access_token, credentials?.username)
-
+          // @ts-ignore
           return {
             ...selectToken,
             user: { ...userData, userName: credentials?.username || '' },
@@ -283,7 +284,7 @@ const nextAuthDefaultOptions = (): NextAuthOptions => {
               response_?.extraInfo,
             ) as SurrogateUser
 
-            const userAvatar = await getAvatarCustomer(selectToken?.access_token, userData?.userId || '')
+            const userAvatar = await getAvatarCustomer(selectToken?.access_token, userData.userId)
             const userAddress = await getUserAddress(selectToken?.access_token)
 
             return {
@@ -334,7 +335,7 @@ const nextAuthDefaultOptions = (): NextAuthOptions => {
     session: {
       strategy: 'jwt',
     },
-    secret: process.env.NEXTAUTH_JWT_SECRET,
+    secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
       async jwt({ token, user: signInToken, trigger, session }: any): Promise<AuthToken> {
         // Signing in

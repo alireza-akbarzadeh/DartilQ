@@ -76,7 +76,11 @@
       }
     ],
     "no-param-reassign": "error",
-    "object-shorthand": ["error", "always"],
+    "object-shorthand": [
+      "error",
+      "always"
+    ],
+    "import/exports-last": "error",
     //blocks
     //expression
     "no-else-return": "error",
@@ -89,7 +93,11 @@
     ],
     //expression
     //ts
-    "import/no-default-export": "error"
+    "import/no-default-export": "error",
+    //ts
+    //JSX
+    "react/self-closing-comp": "error",
+    "react/jsx-no-useless-fragment": "error"
   },
   "overrides": [
     {

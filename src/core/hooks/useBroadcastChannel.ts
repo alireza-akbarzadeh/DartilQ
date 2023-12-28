@@ -8,8 +8,6 @@ type ChannelConstructor = {
 
 const channelNames = {
   basket: 'basket-broadcast-channel',
-  session: 'session-broadcast-channel',
-  auth: 'auth-broadcast-channel',
 }
 
 /**

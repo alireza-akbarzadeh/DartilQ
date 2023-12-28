@@ -1,9 +1,7 @@
 self.addEventListener('install', event => {
   console.log('sw was installed')
-  const cdnUrl = new URL(decodeURIComponent(location.href)).searchParams.get(
-    'basePath',
-  )
-  const cacheItems = ['/icons/favicon.png']
+  const cdnUrl = new URL(decodeURIComponent(location.href)).searchParams.get('basePath')
+  const cacheItems = ['/icons/favicon.ico']
   const cdnItems = [
     `${cdnUrl}/cdn/fonts/unicons/css/line.css`,
     `${cdnUrl}/cdn/fonts/iranYekanX/Farsi_numerals/Webfonts/fontiran.css`,

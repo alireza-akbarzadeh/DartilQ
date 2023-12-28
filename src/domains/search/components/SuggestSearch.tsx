@@ -54,15 +54,19 @@ type SuggestSearchProps = {
 
 const SuggestSearch = memo((props: SuggestSearchProps) => {
   const { push } = useRouter()
+  const { searched } = props
   const path = usePathname()
   const { data: userSession } = useSession()
   const defaultAddress = userSession?.user.address
-  const { data: suggestsData, isLoading } = useGetProductSearchSuggestion({
-    Latitude: defaultAddress?.latitude,
-    Longitude: defaultAddress?.longitude,
-    Query: props.searched,
-    CityId: defaultAddress?.cityId,
-  })
+  const { data: suggestsData, isLoading } = useGetProductSearchSuggestion(
+    {
+      Latitude: defaultAddress?.latitude,
+      Longitude: defaultAddress?.longitude,
+      Query: searched,
+      CityId: defaultAddress?.cityId,
+    },
+    { query: { enabled: !!searched } },
+  )
 
   const suggests = suggestsData?.data
 

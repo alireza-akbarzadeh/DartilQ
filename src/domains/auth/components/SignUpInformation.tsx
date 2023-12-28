@@ -3,19 +3,16 @@
 import { Box, Stack, Typography } from '@mui/material'
 import { useMemo } from 'react'
 import { RegisterOptions, useFormContext } from 'react-hook-form'
-import { FormattedMessage, useIntl } from 'react-intl'
 
 import { HBTextFieldController } from '@/core/components/HBTextField/HBTextFieldController'
 import { HBButton, HBIcon } from '@/core/components/index'
-import { SharedMessages } from '@/shared/shared.messages'
 
-import { authMessages } from '../auth.messages'
 import { StepEnum } from '../authType.d'
 import { useAuthStore } from '../hooks/useAuthStore'
 import { useCreateCustomer } from '../hooks/useCreateCustomer'
 
-export const NAME_MAX_LENGTH = 50
-export const NAME_MIN_LENGTH = 2
+const NAME_MAX_LENGTH = 50
+const NAME_MIN_LENGTH = 2
 
 const RenderError = ({ message }: { message: string }) => {
   return (
@@ -28,19 +25,18 @@ const RenderError = ({ message }: { message: string }) => {
   )
 }
 
-export const SignUpInformation = () => {
+const SignUpInformation = () => {
   const {
     handleSubmit,
     watch,
     getValues,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useFormContext<{
     firstName: string
     lastName: string
     username: string
   }>()
   const { updateStep, changePasswordToken } = useAuthStore()
-  const { formatMessage } = useIntl()
   const { handleCreateCustomer, loading, error } = useCreateCustomer()
 
   const handleSaveData = async () => {
@@ -56,20 +52,19 @@ export const SignUpInformation = () => {
     () => ({
       pattern: {
         value: /^\S[\s\u0600-\u06FF]+$/,
-        message: formatMessage(SharedMessages.onlyPersianText),
+        message: 'از حروف فارسی استفاده کنید',
       },
-      required: { value: true, message: '' },
+      required: {
+        value: true,
+        message: `حداقل از ${NAME_MIN_LENGTH} کاراکتر استفاده کنید`,
+      },
       maxLength: {
         value: NAME_MAX_LENGTH,
-        message: formatMessage(SharedMessages.nameMaxLength, {
-          length: NAME_MAX_LENGTH,
-        }),
+        message: `حداکثر از ${NAME_MAX_LENGTH} کاراکتر استفاده کنید`,
       },
       minLength: {
         value: NAME_MIN_LENGTH,
-        message: formatMessage(SharedMessages.nameMinLength, {
-          length: NAME_MIN_LENGTH,
-        }),
+        message: `حداقل از ${NAME_MIN_LENGTH} کاراکتر استفاده کنید`,
       },
     }),
     [],
@@ -79,38 +74,40 @@ export const SignUpInformation = () => {
     <form onSubmit={handleSubmit(handleSaveData)}>
       <Stack spacing={4}>
         <Typography variant="bodyMedium" color="textAndIcon.darker">
-          <FormattedMessage {...authMessages.enterInformationForRegister} />
+          برای ثبت نام اطلاعات زیر را تکمیل کنید
         </Typography>
 
         <HBTextFieldController
           name="firstName"
           autoFocus
           defaultValue=""
-          label={<FormattedMessage {...authMessages.firstNameLabel} />}
+          label={'نام (به فارسی)'}
           rules={rules}
           error={Boolean(errors?.firstName?.message)}
           helperText={
             <Box display="flex" justifyContent="space-between" alignItems="center">
               <Box>{errors?.firstName?.message && <RenderError message={errors.firstName.message} />}</Box>
               <Typography variant="bodySmall" color="textAndIcon.light">
-                {NAME_MAX_LENGTH}/{watch('firstName')?.length}
+                {NAME_MAX_LENGTH}/{(watch('firstName') || '')?.length}
               </Typography>
             </Box>
           }
+          sx={{ pb: 4 }}
         />
         <HBTextFieldController
           name="lastName"
           defaultValue=""
-          label={<FormattedMessage {...authMessages.lastNameLabel} />}
+          label={'نام خانوادگی (به فارسی)'}
           rules={rules}
           helperText={
             <Box display="flex" justifyContent="space-between" alignItems="center">
               <Box>{errors?.lastName?.message && <RenderError message={errors.lastName.message} />}</Box>
               <Typography variant="bodySmall" color="textAndIcon.light">
-                {NAME_MAX_LENGTH}/{watch('lastName')?.length}
+                {NAME_MAX_LENGTH}/{(watch('lastName') || '')?.length}
               </Typography>
             </Box>
           }
+          sx={{ pb: 4 }}
         />
 
         {error && (
@@ -121,13 +118,15 @@ export const SignUpInformation = () => {
 
         <Stack direction="row" spacing={3} py={2}>
           <HBButton sx={{ flex: 1 }} variant="secondary" onClick={() => updateStep(StepEnum.checkPhoneNumber)}>
-            <FormattedMessage {...authMessages.back} />
+            بازگشت
           </HBButton>
-          <HBButton variant="primary" sx={{ flex: 1 }} type="submit" disabled={!isValid || loading} loading={loading}>
-            <FormattedMessage {...authMessages.nextStep} />
+          <HBButton variant="primary" sx={{ flex: 1 }} type="submit" disabled={loading} loading={loading}>
+            مرحله بعد
           </HBButton>
         </Stack>
       </Stack>
     </form>
   )
 }
+
+export { NAME_MAX_LENGTH, NAME_MIN_LENGTH, SignUpInformation }

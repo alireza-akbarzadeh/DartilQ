@@ -1,0 +1,125 @@
+{
+  "root": true,
+  "ignorePatterns": [],
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "simple-import-sort",
+    "react",
+    "import"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react/jsx-runtime",
+    "plugin:prettier/recommended"
+  ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "rules": {
+    "complexity": [
+      "warn",
+      30
+    ],
+    "no-console": "warn",
+    "camelcase": [
+      "error",
+      {
+        "ignoreDestructuring": true,
+        "properties": "never",
+        "ignoreImports": true,
+        "ignoreGlobals": true
+      }
+    ],
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "prefer-exponentiation-operator": "error",
+    "prefer-template": "error",
+    // Comments
+    "line-comment-position": [
+      "error",
+      {
+        "position": "above"
+      }
+    ],
+    "capitalized-comments": [
+      "error",
+      "always"
+    ],
+    "multiline-comment-style": [
+      "error",
+      "starred-block"
+    ],
+    // Comments
+    //blocks
+    "default-param-last": [
+      "error"
+    ],
+    "func-style": [
+      "error",
+      "expression"
+    ],
+    "no-empty": [
+      "error",
+      {
+        "allowEmptyCatch": true
+      }
+    ],
+    "no-param-reassign": "error",
+    "object-shorthand": ["error", "always"],
+    "import/exports-last":"error",
+    //blocks
+    //expression
+    "no-else-return": "error",
+    "no-lonely-if": "error",
+    "no-nested-ternary": "error",
+    "default-case": "error",
+    "eqeqeq": [
+      "error",
+      "smart"
+    ],
+    //expression
+    //ts
+    "import/no-default-export": "error",
+    //ts
+    //JSX
+    "react/self-closing-comp":"error",
+    "react/jsx-no-useless-fragment":"error"
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.ts",
+        "**/*.tsx"
+      ],
+      "extends": [
+        "plugin:@typescript-eslint/recommended"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "plugins": [
+        "@typescript-eslint"
+      ],
+      "rules": {
+        "@typescript-eslint/ban-ts-comment": "off"
+      }
+    },
+    {
+      "files": [
+        "**/app/**/{page,layout,template,loading,error}.tsx"
+      ],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    }
+  ]
+}

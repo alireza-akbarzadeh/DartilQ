@@ -1,0 +1,120 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - stage
+      - test
+      - develop
+
+parameters:
+  - name: deploy
+    displayName: Deploy
+    type: boolean
+    default: true
+    values:
+      - false
+      - true
+
+variables:
+  - group: Dartil
+
+pool:
+  name: $(Build.SourceBranchName)
+
+stages:
+  - stage: Build_DartilQ
+    displayName: Build DartilQ "Deployment" Image
+    jobs:
+      - job: Build_DartilQ
+        displayName: 'Building DartilQ Deployment Image'
+        steps:
+          - task: Bash@3
+            displayName: 'Building DartilQ "Deployment" Docker Image'
+            inputs:
+              targetType: 'inline'
+              script: |
+                cp .env.$(Build.SourceBranchName) .env
+                docker login -u $(dockerRegistryUser) -p $(dockerRegistryPassword) $(dockerRegistry)
+                docker build -f dockerfiles/Dockerfile --cache-from $(dockerRegistry)/frontend/dartilq:$(Build.SourceBranchName) --progress=plain -t $(dockerRegistry)/frontend/dartilq:$(Build.BuildNumber) .
+          - task: Bash@3
+            displayName: 'Pushing DartilQ Docker Image'
+            inputs:
+              targetType: 'inline'
+              script: |
+                docker push $(dockerRegistry)/frontend/dartilq:$(Build.BuildNumber)
+                docker tag $(dockerRegistry)/frontend/dartilq:$(Build.BuildNumber) $(dockerRegistry)/frontend/dartilq:$(Build.SourceBranchName)
+                docker push $(dockerRegistry)/frontend/dartilq:$(Build.SourceBranchName)
+
+  - stage: Gitops_DartilQ
+    displayName: Gitops DartilQ Frontend project
+    dependsOn: Build_DartilQ
+    jobs:
+      - job: Gitops_DartilQ
+        displayName: 'Gitops_DartilQ_Frontend'
+        steps:
+          - checkout: self
+            persistCredentials: true
+          - checkout: git://Hastim/gitops
+            persistCredentials: true
+          - task: Bash@3
+            displayName: 'GitOps Bump frontend DartilQ on $(Build.SourceBranchName)'
+            env:
+              SERVICE_NAME: qcommerce
+              IMAGE_NAME: $(dockerRegistry)/frontend/dartilq:$(Build.SourceBranchName)
+              IMAGE_TAG: $(Build.BuildNumber)
+              BRANCHE_NAME: $(Build.SourceBranchName)
+              REPO_NAME: FrontEnd_Monorepo
+              TARGET_PORT: 4003
+            inputs:
+              targetType: 'inline'
+              script: |
+                env
+                echo "-------------------------"
+                cd $(Build.SourcesDirectory)/gitops
+                git config --global user.name "moradi.saeed"
+                git config --global user.email "moradi.saeed@hasti.co"
+                git checkout -f $(Build.SourceBranchName)
+                git pull
+                if [ ! -d $(Build.SourcesDirectory)/gitops/FrontEnd_Monorepo/$SERVICE_NAME/manifests ]; then
+                    mkdir -p $(Build.SourcesDirectory)/gitops/FrontEnd_Monorepo/$SERVICE_NAME/manifests
+                    cp -rf $(Build.SourcesDirectory)/gitops/templates-frontend $(Build.SourcesDirectory)/gitops/FrontEnd_Monorepo/$SERVICE_NAME/
+                fi
+                envsubst < $(Build.SourcesDirectory)/gitops/FrontEnd_Monorepo/$SERVICE_NAME/templates-frontend/deployment.template > $(Build.SourcesDirectory)/gitops/FrontEnd_Monorepo/$SERVICE_NAME/manifests/deployment.yaml
+                envsubst < $(Build.SourcesDirectory)/gitops/FrontEnd_Monorepo/$SERVICE_NAME/templates-frontend/service.template > $(Build.SourcesDirectory)/gitops/FrontEnd_Monorepo/$SERVICE_NAME/manifests/service.yaml
+                mkdir -p $(Build.SourcesDirectory)/gitops/ArgoCD/application
+                envsubst < $(Build.SourcesDirectory)/gitops/ArgoCD/template/frontend.template > $(Build.SourcesDirectory)/gitops/ArgoCD/application/$SERVICE_NAME.yml
+                git add .
+                git commit -m "bump version $(Build.BuildNumber) $SERVICE_NAME  [skip ci][skip azurepipelines]" -n
+                git pull || true && git push || true
+
+  - stage: Deploy_DartilQ_Stage
+    displayName: Deploy_DartilQ
+    condition: and(succeeded(),eq(variables['Build.SourceBranchName'] , 'stage'))
+    dependsOn: Build_DartilQ
+    jobs:
+      - job: Deploy
+        displayName: 'Deploying DartilQ Stage '
+        steps:
+          - checkout: none
+          - task: SSH@0
+            inputs:
+              sshEndpoint: stage
+              runOptions: 'inline'
+              inline: |
+                docker pull $(dockerRegistry)/frontend/dartilq:$(Build.SourceBranchName)
+                run_command.sh "docker service update --image $(dockerRegistry)/frontend/dartilq:$(Build.SourceBranchName) stage_qpwa --with-registry-auth "
+              failOnStdErr: false
+              readyTimeout: '20000'
+
+  - stage: Clean_UP
+    displayName: CleanUP
+    dependsOn:
+      - Deploy_DartilQ_Stage
+
+    jobs:
+      - job: cleanUpWorkspace
+        displayName: 'Clean up workspace'
+        steps:
+          - task: PostBuildCleanup@3
+            inputs:
+              disableCertCheck: true
